@@ -15,6 +15,7 @@ import {
   increaseCancelCountReq,
   AddEarningsRequest,
 } from '@/types';
+import { DriverEventProducer } from '@/events/publisher';
 
 @injectable()
 export class DriverService implements IDriverService {
@@ -38,7 +39,7 @@ export class DriverService implements IDriverService {
       walletBalance: 0,
       adminCommission: response.adminCommission || 0,
     };
-
+    DriverEventProducer.publishNotificationEvent({ id: response.id.toString() });
     return {
       status: StatusCode.OK,
       message: 'success',

@@ -13,7 +13,7 @@ const DriverSchema: Schema = new Schema(
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
     mobile: {
-      type: String,
+      type: Number,
       required: true,
       unique: true,
       trim: true,

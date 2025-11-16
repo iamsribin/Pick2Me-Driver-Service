@@ -13,6 +13,7 @@ export class LoginController implements ILoginController {
   checkLogin = async (req: Request, res: Response, _next: NextFunction) => {
     try {
       const mobile = req.body.mobile;
+      console.log('uiuiui');
 
       if (!mobile) BadRequestError('mobile number is missing');
 
@@ -35,7 +36,10 @@ export class LoginController implements ILoginController {
       });
 
       res.status(+response.status).json(responseWithoutToken);
+      console.log(responseWithoutToken);
     } catch (error: unknown) {
+      console.log('Error in checkLogin:', error);
+
       _next(error);
     }
   };

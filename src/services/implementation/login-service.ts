@@ -25,7 +25,10 @@ export class LoginService implements ILoginService {
 
   async loginCheckDriver(mobile: number): Promise<CheckLoginDriverRes> {
     try {
-      const response = await this._driverRepo.findOne({ mobile });
+      console.log({ mobile: Number(mobile)  });
+      const response = await this._driverRepo.findOne({ mobile: Number(mobile) });
+      console.log(response);
+
       if (!response) {
         throw NotFoundError('Account not found. Please create a new account.');
       }
