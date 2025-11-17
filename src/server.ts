@@ -5,6 +5,7 @@ import { startGrpcServer } from './grpc/server';
 import { isEnvDefined } from './utilities/envChecker';
 import { createRedisService } from '@Pick2Me/shared/redis';
 import { connectDB } from '@Pick2Me/shared/mongo';
+import './jobs/worker';
 
 // server
 const startServer = async () => {
