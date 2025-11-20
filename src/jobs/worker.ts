@@ -10,6 +10,10 @@ async function start() {
     runDocumentExpiryCheck(7, 7).catch((err) => console.error(err));
   });
 }
+// (async () => {
+//   console.info('[expiry-job] manual trigger');
+//   await runDocumentExpiryCheck(7, 7).catch(console.error);
+// })();
 
 start().catch((err) => {
   console.error(err);

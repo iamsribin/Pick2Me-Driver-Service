@@ -2,16 +2,20 @@ import { EXCHANGES, RabbitMQ, ROUTING_KEYS } from '@Pick2Me/shared/messaging';
 
 const url = process.env.RABBIT_URL!;
 
+interface documentData {
+  messageId: string;
+  receiverId: string;
+  documents: any;
+  generatedAt: Date;
+}
+
 export class DriverEventProducer {
-  static async publishDocumentExpireNotification(notificationData: any) {
+  static async publishDocumentExpireNotification(documentData: documentData) {
     await RabbitMQ.connect({ url, serviceName: 'driver-service' });
     await RabbitMQ.setupExchange(EXCHANGES.DRIVER, 'topic');
 
     const notificationPayload = {
-      receiverId: notificationData.id,
-      title: 'document expires',
-      body: 'your ${documents} expires update that before going to online',
-      data: new Date(),
+      data: documentData,
       type: ROUTING_KEYS.NOTIFY_DOCUMENT_EXPIRE,
     };
 
@@ -20,6 +24,6 @@ export class DriverEventProducer {
       ROUTING_KEYS.NOTIFY_DOCUMENT_EXPIRE,
       notificationPayload
     );
-    console.log(`[Driver ser] 📤 Published notificatio → ${notificationData.id}`);
+    console.log(`[Driver ser] 📤 Published notificatio → ${notificationPayload}`);
   }
 }

@@ -15,7 +15,6 @@ import {
   increaseCancelCountReq,
   AddEarningsRequest,
 } from '@/types';
-import { DriverEventProducer } from '@/events/publisher';
 
 @injectable()
 export class DriverService implements IDriverService {
@@ -39,7 +38,6 @@ export class DriverService implements IDriverService {
       walletBalance: 0,
       adminCommission: response.adminCommission || 0,
     };
-    DriverEventProducer.publishNotificationEvent({ id: response.id.toString() });
     return {
       status: StatusCode.OK,
       message: 'success',
@@ -201,7 +199,7 @@ export class DriverService implements IDriverService {
 
         await redisService.addDriverGeo(data.driverId, data.location.lng, data.location.lat);
         await redisService.setHeartbeat(data.driverId);
-        await redisService.setDriverDetails(driverDetails);
+        // await redisService.isDriverOnline(driverDetails);
       }
       await this._driverRepo.updateOne(
         { _id: data.driverId },

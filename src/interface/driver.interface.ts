@@ -85,6 +85,9 @@ export interface DriverInterface extends Document {
   totalRatings?: number;
   ratingSum?: number;
 
+  lastExpiryNotificationAt?:Date,
+  lastExpiryNotificationFor?: [string],
+
   createdAt?: Date;
   updatedAt?: Date;
 }

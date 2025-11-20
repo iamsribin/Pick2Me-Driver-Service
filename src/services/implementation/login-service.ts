@@ -25,7 +25,7 @@ export class LoginService implements ILoginService {
 
   async loginCheckDriver(mobile: number): Promise<CheckLoginDriverRes> {
     try {
-      console.log({ mobile: Number(mobile)  });
+      console.log({ mobile: Number(mobile) });
       const response = await this._driverRepo.findOne({ mobile: Number(mobile) });
       console.log(response);
 

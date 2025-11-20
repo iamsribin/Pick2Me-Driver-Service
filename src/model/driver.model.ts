@@ -81,6 +81,9 @@ const DriverSchema: Schema = new Schema(
     isAvailable: { type: Boolean, default: true },
     totalRatings: { type: Number, default: 0 },
 
+    lastExpiryNotificationAt: { type: Date },
+    lastExpiryNotificationFor: { type: [String], default: [] },
+
     ratingSum: { type: Number, default: 0 },
   },
   { timestamps: true }

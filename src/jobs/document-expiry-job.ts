@@ -2,8 +2,6 @@ import { DriverModel } from '@/model/driver.model';
 import { DriverEventProducer } from '@/events/publisher';
 import { v4 as uuidv4 } from 'uuid';
 
-const ROUTING_KEY = 'driver.document.expiry';
-
 function daysFromNow(days: number) {
   const d = new Date();
   d.setDate(d.getDate() + days);
@@ -66,11 +64,9 @@ export async function runDocumentExpiryCheck(thresholdDays = 7, minNotificationI
 
         const msg = {
           messageId: uuidv4(),
-          service: 'driver-service',
           receiverId: driver._id.toString(),
           documents: notifications,
-          generatedAt: new Date().toISOString(),
-          type: ROUTING_KEY,
+          generatedAt: new Date(),
         };
 
         await DriverEventProducer.publishDocumentExpireNotification(msg);
@@ -80,7 +76,7 @@ export async function runDocumentExpiryCheck(thresholdDays = 7, minNotificationI
           setObj[`lastExpiryNotifiedFor.${n.documentType}`] = new Date();
         });
 
-        await DriverModel.updateOne({ _id: driver._id }, { $set: setObj }).exec();
+        // await DriverModel.updateOne({ _id: driver._id }, { $set: setObj }).exec();
         count++;
       } catch (innerErr) {
         console.error('[expiry-job] failed to notify for driver', driver._id, innerErr);
@@ -96,3 +92,33 @@ export async function runDocumentExpiryCheck(thresholdDays = 7, minNotificationI
 function get(obj: any, path: string) {
   return path.split('.').reduce((acc: any, p: string) => (acc ? acc[p] : undefined), obj);
 }
+
+
+
+// notificationPayload {
+//   messageId: 'f6ac9a9a-2c08-4efc-9bac-0e00cad02a7e',
+//   receiverId: '68933743b49a8cf584ff3ef5',
+//   documents: [
+//     {
+//       documentType: 'license',
+//       expiryDate: 2025-09-07T00:00:00.000Z,
+//       daysLeft: -72
+//     },
+//     {
+//       documentType: 'rc',
+//       expiryDate: 2025-09-07T00:00:00.000Z,
+//       daysLeft: -72
+//     },
+//     {
+//       documentType: 'insurance',
+//       expiryDate: 2025-09-07T00:00:00.000Z,
+//       daysLeft: -72
+//     },
+//     {
+//       documentType: 'pollution',
+//       expiryDate: 2025-09-06T00:00:00.000Z,
+//       daysLeft: -73
+//     }
+//   ],
+//   generatedAt: '2025-11-18T07:51:24.758Z'
+// }

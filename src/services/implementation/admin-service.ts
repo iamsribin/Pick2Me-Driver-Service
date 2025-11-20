@@ -23,6 +23,8 @@ import {
   createDriverConnectAccountRpc,
 } from '@/grpc/clients/paymentClient';
 import { ServiceError } from '@grpc/grpc-js';
+import { generateStatusEmail } from '@/utilities/generate-status-email';
+import { sendMail } from '@/utilities/node-mailer';
 
 @injectable()
 export class AdminService implements IAdminService {
@@ -243,17 +245,17 @@ export class AdminService implements IAdminService {
           ? { accountId: connectResult.accountId, accountLinkUrl: connectResult.accountLinkUrl }
           : {}),
       };
-      console.log('dssddf', updateData);
+      console.log('updateData', updateData);
 
-      // await this._driverRepo.update(request.id, updateData);
+      await this._driverRepo.update(request.id, updateData);
 
-      // if (request.status == 'Blocked') {
-      //   redisService.addBlacklistedToken(request.id, 180);
-      // }
+      if (request.status == 'Blocked') {
+        redisService.addBlacklistedToken(request.id, 180);
+      }
 
-      // const subjectAndText = generateStatusEmail(request.status, driver.name, request.reason);
+      const subjectAndText = generateStatusEmail(request.status, driver.name, request.reason);
 
-      // await sendMail(driver.email, subjectAndText.subject, subjectAndText.text);
+      await sendMail(driver.email, subjectAndText.subject, subjectAndText.text);
       return {
         status: StatusCode.OK,
         message: 'Success',

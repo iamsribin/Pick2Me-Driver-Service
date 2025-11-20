@@ -34,7 +34,6 @@ export class DriverRepository
     try {
       return this.findOne({ mobile });
     } catch {
-
       return null;
     }
   }

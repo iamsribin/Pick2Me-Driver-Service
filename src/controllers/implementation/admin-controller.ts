@@ -64,8 +64,11 @@ export class AdminController implements IAdminController {
       if (!id || !note || !status) throw BadRequestError('some fields is missing');
 
       const request = { id, reason: note, status, fields };
+console.log({ id, reason: note, status, fields });
 
       const response = await this._adminService.updateAccountStatus(request);
+      console.log('response', response);
+
       res.status(+response.status).json(response);
     } catch (error) {
       _next(error);
