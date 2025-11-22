@@ -138,6 +138,7 @@ export class DriverController implements IDriverController {
   handleOnlineChange = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     try {
       const { ...data } = req.body;
+      const driver = req.gatewayUser; //{role:'',id:''}
       const response = await this._driverService.handleOnlineChange(data);
       res.status(+response.status).json(response);
     } catch (error) {
