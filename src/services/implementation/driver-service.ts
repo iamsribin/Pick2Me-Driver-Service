@@ -234,9 +234,8 @@ export class DriverService implements IDriverService {
   public async toggleOnline(driverId: string, goOnline: boolean, lat?: number, lng?: number) {
     try {
       const redis = getRedisService();
-      console.log('toggleOnline', goOnline);
 
-      const inRide = await redis.getInRideDriverDetails(driverId);
+      const inRide = await redis.getOnlineDriverDetails(driverId);
       if (goOnline && inRide) {
         throw ConflictError('Driver currently in ride');
       }
@@ -274,12 +273,10 @@ export class DriverService implements IDriverService {
           isAvailable: true,
         });
 
-        await redis.setOnlineDriverDetails(details, 300); // TTL 5min
-
         if (typeof lng === 'number' && typeof lat === 'number') {
-          await redis.addDriverGeo(driverId, lng, lat, false);
+          await redis.setOnlineDriver(details, { latitude: lat, longitude: lng });
         }
-        await redis.setHeartbeat(driverId, 120);
+        await redis.setHeartbeat(driverId);
 
         return { status: StatusCode.OK, message: 'Driver is now online' };
       } else {
