@@ -30,3 +30,11 @@ export interface DriverProfileDTO {
   walletBalance?: number;
   adminCommission: number;
 }
+
+export interface MainDashboardDto {
+  todayEarnings: number;
+  completedRides: number;
+  onlineHours: string;
+  canceledRides: number;
+  isOnline: boolean;
+}

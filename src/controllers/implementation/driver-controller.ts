@@ -135,15 +135,25 @@ export class DriverController implements IDriverController {
     }
   };
 
-  handleOnlineChange = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+  handleOnlineChange = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { ...data } = req.body;
-      const driver = req.gatewayUser; //{role:'',id:''}
-      const response = await this._driverService.handleOnlineChange(data);
-      res.status(+response.status).json(response);
+      const driver = req.gatewayUser;
+      const { online, latitude, longitude } = req.body;
+
+      const result = await this._driverService.toggleOnline(driver.id, online, latitude, longitude);
+      res.status(+result.status).json(result.message);
+    } catch (err) {
+      return next(err);
+    }
+  };
+
+  fetchMainDashboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const driver = req.gatewayUser;
+      const response = await this._driverService.fetchMainDashboard(driver.id);
+      res.status(StatusCode.OK).json(response);
     } catch (error) {
-      console.log(error);
-      _next(error);
+      next(error);
     }
   };
 

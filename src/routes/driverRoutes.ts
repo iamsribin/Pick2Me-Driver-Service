@@ -16,7 +16,7 @@ driverRouter.use(verifyGatewayJwt(true, process.env.GATEWAY_SHARED_SECRET!));
 driverRouter.post('/me/online-status', catchAsync(driverController.handleOnlineChange));
 driverRouter.get('/me', catchAsync(driverController.fetchDriverProfile));
 driverRouter.get('/me/documents', catchAsync(driverController.fetchDriverDocuments));
-
+driverRouter.get('/me/main-dashboard', catchAsync(driverController.fetchMainDashboard));
 driverRouter.put(
   '/me/profile-image',
   upload.single('profilePhoto'),

@@ -41,6 +41,8 @@ import { IRideRepository } from '@/repositories/interfaces/i-ride-repository';
 import { ResubmissionInterface } from '@/interface/resubmission.interface';
 import { ResubmissionModel } from '@/model/resubmission.model';
 import { IMongoBaseRepository, MongoBaseRepository } from '@Pick2Me/shared/mongo';
+import { DailyStatusRepository } from '@/repositories/implementation/daily-status-repository';
+import { IDailyStatusRepository } from '@/repositories/interfaces/i-daily-satus-repository';
 
 const container = new Container();
 
@@ -62,6 +64,7 @@ container.bind<IRideService>(TYPES.RideService).to(RideService);
 // container.bind<IMongoBaseRepository<DriverInterface>>(TYPES.BaseRepository).to(MongoBaseRepository);
 container.bind<IAdminRepository>(TYPES.AdminRepository).to(AdminRepository);
 container.bind<IDriverRepository>(TYPES.DriverRepository).to(DriverRepository);
+container.bind<IDailyStatusRepository>(TYPES.DailyStatusRepository).to(DailyStatusRepository);
 container.bind<IRideRepository>(TYPES.RideRepository).to(RideRepository);
 container
   .bind<IMongoBaseRepository<ResubmissionInterface>>(TYPES.ResubmissionRepository)

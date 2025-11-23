@@ -1,7 +1,7 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export interface DriverDailyStatsInterface {
-  _id?: Types.ObjectId;
+export interface DriverDailyStatsInterface extends Document {
+  _id: Types.ObjectId;
   driverId: Types.ObjectId;
   date: Date;
   onlineMinutes?: number;

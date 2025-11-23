@@ -10,6 +10,7 @@ export const TYPES = {
   DriverRepository: Symbol.for('DriverRepository'),
   RideRepository: Symbol.for('RideRepository'),
   AdminRepository: Symbol.for('AdminRepository'),
+  DailyStatusRepository: Symbol.for('DailyStatusRepository'),
 
   AdminService: Symbol.for('AdminService'),
   DriverService: Symbol.for('DriverService'),

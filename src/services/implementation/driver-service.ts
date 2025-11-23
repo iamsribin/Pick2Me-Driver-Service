@@ -1,24 +1,37 @@
 import { IDriverRepository } from '@/repositories/interfaces/i-driver-repository';
 import { IDriverService } from '../interfaces/i-driver-service';
-import { DriverDocumentDTO, DriverProfileDTO } from '@/dto/driver.dto';
+import { DriverDocumentDTO, DriverProfileDTO, MainDashboardDto } from '@/dto/driver.dto';
 import { PaymentResponse } from '@/types/driver-type/response-type';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/types/inversify-types';
 import { AccountStatus, DriverInterface } from '@/interface/driver.interface';
-import { HttpError, InternalError, NotFoundError } from '@Pick2Me/shared/errors';
-import { IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
+import {
+  BadRequestError,
+  ConflictError,
+  HttpError,
+  InternalError,
+  NotFoundError,
+} from '@Pick2Me/shared/errors';
+import { IResponse, OnlineDriverDetails, StatusCode } from '@Pick2Me/shared/interfaces';
 import { getRedisService } from '@Pick2Me/shared/redis';
 import {
   UpdateDriverDocumentsReq,
   UpdateDriverProfileReq,
-  handleOnlineChangeReq,
   increaseCancelCountReq,
   AddEarningsRequest,
 } from '@/types';
+import { IDailyStatusRepository } from '@/repositories/interfaces/i-daily-satus-repository';
+import { formatOnlineMinutes } from '@/utilities/formatTime';
 
 @injectable()
 export class DriverService implements IDriverService {
-  constructor(@inject(TYPES.DriverRepository) private _driverRepo: IDriverRepository) {}
+  constructor(
+    @inject(TYPES.DriverRepository)
+    private _driverRepo: IDriverRepository,
+
+    @inject(TYPES.DailyStatusRepository)
+    private _dailyStatusRepo: IDailyStatusRepository
+  ) {}
 
   async fetchDriverProfile(id: string): Promise<IResponse<DriverProfileDTO>> {
     const response = await this._driverRepo.findById(id);
@@ -162,59 +175,167 @@ export class DriverService implements IDriverService {
     }
   }
 
-  async handleOnlineChange(data: handleOnlineChangeReq): Promise<IResponse<null>> {
+  // async handleOnlineChange(data: handleOnlineChangeReq): Promise<IResponse<null>> {
+  //   try {
+  //     console.log('handleOnlineChange data:', data);
+
+  //     const driver = await this._driverRepo.findById(data.driverId);
+  //     if (!driver) {
+  //       throw NotFoundError('Driver not found');
+  //     }
+
+  //     const redisService = getRedisService();
+
+  //     // If going offline → calculate hours
+  //     if (!data.online && data.onlineTimestamp) {
+  //       const onlineDurationMs = Date.now() - new Date(data.onlineTimestamp).getTime();
+  //       const hours = Math.round((onlineDurationMs / (1000 * 60 * 60)) * 100) / 100;
+  //       await this._driverRepo.updateOnlineHours(data.driverId, hours);
+
+  //       redisService.removeOnlineDriver(data.driverId);
+  //     }
+
+  //     // If going online → add/update Redis
+  //     if (data.online) {
+  //       const driverDetails = {
+  //         driverId: data.driverId,
+  //         driverNumber: driver.mobile.toString(),
+  //         name: driver.name,
+  //         cancelledRides: driver.totalCancelledRides || 0,
+  //         rating: driver.totalRatings || 0,
+  //         vehicleModel: driver.vehicleDetails.model,
+  //         driverPhoto: driver.driverImage,
+  //         vehicleNumber: driver.vehicleDetails.vehicleNumber,
+  //         stripeId: driver.accountId,
+  //         stripeLinkUrl: driver.accountLinkUrl,
+  //       };
+
+  //       await redisService.addDriverGeo(data.driverId, data.location.lng, data.location.lat);
+  //       await redisService.setHeartbeat(data.driverId);
+  //       // await redisService.isDriverOnline(driverDetails);
+  //     }
+  //     await this._driverRepo.updateOne(
+  //       { _id: data.driverId },
+  //       { $set: { onlineStatus: data.online } }
+  //     );
+
+  //     return { status: StatusCode.OK, message: 'Driver status updated' };
+  //   } catch (error: unknown) {
+  //     if (error instanceof HttpError) throw error;
+
+  //     throw InternalError('', {
+  //       details: {
+  //         cause: error instanceof Error ? error.message : String(error),
+  //       },
+  //     });
+  //   }
+  // }
+
+  public async toggleOnline(driverId: string, goOnline: boolean, lat?: number, lng?: number) {
     try {
-      console.log('handleOnlineChange data:', data);
+      const redis = getRedisService();
+      console.log('toggleOnline', goOnline);
 
-      const driver = await this._driverRepo.findById(data.driverId);
-      if (!driver) {
-        throw NotFoundError('Driver not found');
+      const inRide = await redis.getInRideDriverDetails(driverId);
+      if (goOnline && inRide) {
+        throw ConflictError('Driver currently in ride');
       }
 
-      const redisService = getRedisService();
+      const driver = await this._driverRepo.findById(driverId);
+      if (!driver) throw NotFoundError('driver not found');
 
-      // If going offline → calculate hours
-      if (!data.online && data.onlineTimestamp) {
-        const onlineDurationMs = Date.now() - new Date(data.onlineTimestamp).getTime();
-        const hours = Math.round((onlineDurationMs / (1000 * 60 * 60)) * 100) / 100;
-        await this._driverRepo.updateOnlineHours(data.driverId, hours);
-
-        redisService.removeOnlineDriver(data.driverId);
+      if (goOnline && driver.isAvailable) {
+        throw ConflictError('Driver already online on another device');
       }
 
-      // If going online → add/update Redis
-      if (data.online) {
-        const driverDetails = {
-          driverId: data.driverId,
-          driverNumber: driver.mobile.toString(),
+      if (goOnline && driver.accountLinkUrl) {
+        throw BadRequestError(
+          'complete your stripe account verification first! go to wallet tab and complete it'
+        );
+      }
+
+      if (goOnline) {
+        const details: OnlineDriverDetails = {
+          driverId,
+          driverNumber: driver.mobile?.toString(),
           name: driver.name,
           cancelledRides: driver.totalCancelledRides || 0,
           rating: driver.totalRatings || 0,
-          vehicleModel: driver.vehicleDetails.model,
+          vehicleModel: driver.vehicleDetails?.model,
           driverPhoto: driver.driverImage,
-          vehicleNumber: driver.vehicleDetails.vehicleNumber,
+          vehicleNumber: driver.vehicleDetails?.vehicleNumber,
           stripeId: driver.accountId,
-          stripeLinkUrl: driver.accountLinkUrl,
+          sessionStart: Date.now(),
+          lastSeen: Date.now(),
         };
 
-        await redisService.addDriverGeo(data.driverId, data.location.lng, data.location.lat);
-        await redisService.setHeartbeat(data.driverId);
-        // await redisService.isDriverOnline(driverDetails);
+        await this._driverRepo.update(driverId, {
+          onlineStatus: true,
+          isAvailable: true,
+        });
+
+        await redis.setOnlineDriverDetails(details, 300); // TTL 5min
+
+        if (typeof lng === 'number' && typeof lat === 'number') {
+          await redis.addDriverGeo(driverId, lng, lat, false);
+        }
+        await redis.setHeartbeat(driverId, 120);
+
+        return { status: StatusCode.OK, message: 'Driver is now online' };
+      } else {
+        const onlineDetails = await redis.getOnlineDriverDetails(driverId);
+        const now = Date.now();
+
+        console.log('onlineDetails', onlineDetails);
+
+        if (onlineDetails && onlineDetails.sessionStart) {
+          await this._dailyStatusRepo.addSessionMinutesToDailyStats(
+            driverId,
+            onlineDetails.sessionStart,
+            now
+          );
+        }
+
+        await redis.removeOnlineDriver(driverId);
+
+        await this._driverRepo.update(driverId, {
+          onlineStatus: false,
+          isAvailable: false,
+        });
+
+        return { status: StatusCode.OK, message: 'Driver is now offline' };
       }
-      await this._driverRepo.updateOne(
-        { _id: data.driverId },
-        { $set: { onlineStatus: data.online } }
-      );
-
-      return { status: StatusCode.OK, message: 'Driver status updated' };
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof HttpError) throw error;
+      throw InternalError('something went wrong');
+    }
+  }
 
-      throw InternalError('', {
-        details: {
-          cause: error instanceof Error ? error.message : String(error),
-        },
+  async fetchMainDashboard(driverId: string): Promise<MainDashboardDto> {
+    try {
+      const driver = await this._driverRepo.findById(driverId);
+      if (!driver) throw BadRequestError('driver not found');
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const todayStatus = await this._dailyStatusRepo.findOne({
+        driverId,
+        date: today,
       });
+
+      const response: MainDashboardDto = {
+        canceledRides: todayStatus?.cancelledRides ?? 0,
+        completedRides: todayStatus?.completedRides ?? 0,
+        isOnline: driver.onlineStatus ?? false,
+        onlineHours: formatOnlineMinutes(todayStatus?.onlineMinutes ?? 0),
+        todayEarnings: todayStatus?.earningsInPaise ?? 0,
+      };
+
+      return response;
+    } catch (error) {
+      if (error instanceof HttpError) throw error;
+      throw InternalError('something went wrong');
     }
   }
 

@@ -1,5 +1,5 @@
 import { IResponse } from '@Pick2Me/shared/interfaces';
-import { DriverDocumentDTO, DriverProfileDTO } from '@/dto/driver.dto';
+import { DriverDocumentDTO, DriverProfileDTO, MainDashboardDto } from '@/dto/driver.dto';
 import {
   AddEarningsRequest,
   handleOnlineChangeReq,
@@ -14,7 +14,14 @@ export interface IDriverService {
   updateDriverProfile(data: UpdateDriverProfileReq): Promise<IResponse<null>>;
   fetchDriverDocuments(id: string): Promise<IResponse<DriverDocumentDTO>>;
   updateDriverDocuments(data: UpdateDriverDocumentsReq): Promise<IResponse<null>>;
-  handleOnlineChange(data: handleOnlineChangeReq): Promise<IResponse<null>>;
+  // handleOnlineChange(data: handleOnlineChangeReq): Promise<IResponse<null>>;
+  toggleOnline(
+    driverId: string,
+    goOnline: boolean,
+    lat?: number,
+    lng?: number
+  ): Promise<IResponse<null>>;
+  fetchMainDashboard(driverId: string): Promise<MainDashboardDto>;
   addEarnings(earnings: AddEarningsRequest): Promise<PaymentResponse>;
   getDriverStripe(driverId: string): Promise<{ status: string; stripeId: string }>;
   increaseCancelCount(payload: increaseCancelCountReq): Promise<void>;
