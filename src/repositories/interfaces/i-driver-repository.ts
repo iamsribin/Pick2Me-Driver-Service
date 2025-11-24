@@ -28,4 +28,10 @@ export interface IDriverRepository extends IMongoBaseRepository<DriverInterface>
   updateOnlineHours(driverId: string, hoursToAdd: number): Promise<void | null>;
   increaseCancelCount(driverId: string): Promise<void | null>;
   addEarnings(data: AddEarningsRequest): Promise<DriverInterface | null>;
+  checkDocumentExpiry(driverId: string): Promise<{
+    driverId: string;
+    expiredDocuments: string[];
+    expiringSoonDocuments: string[];
+    checkedAt: string;
+  } | null>;
 }

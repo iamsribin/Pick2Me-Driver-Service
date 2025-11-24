@@ -328,4 +328,68 @@ export class DriverRepository
       return null;
     }
   }
+
+  async checkDocumentExpiry(
+    driverId: string,
+    expiringDays = 7
+  ): Promise<{
+    driverId: string;
+    expiredDocuments: string[];
+    expiringSoonDocuments: string[];
+    checkedAt: string;
+  } | null> {
+    try {
+      const driver = await DriverModel.findById(driverId, {
+        license: 1,
+        vehicleDetails: 1,
+        lastExpiryNotificationAt: 1,
+        lastExpiryNotificationFor: 1,
+        name: 1,
+      });
+
+      if (!driver) return null;
+
+      const now = new Date();
+      const future = new Date(now);
+      future.setDate(future.getDate() + expiringDays);
+
+      const toDate = (d: Date | string | null | undefined): Date | null => {
+        if (!d) return null;
+        if (d instanceof Date) return d;
+
+        const parsed = new Date(d);
+        return isNaN(parsed.getTime()) ? null : parsed;
+      };
+
+      const checks: Array<{ key: string; date: Date | null }> = [
+        { key: 'license', date: toDate(driver.license?.validity) },
+        { key: 'rc', date: toDate(driver.vehicleDetails?.rcExpiryDate) },
+        { key: 'insurance', date: toDate(driver.vehicleDetails?.insuranceExpiryDate) },
+        { key: 'pollution', date: toDate(driver.vehicleDetails?.pollutionExpiryDate) },
+      ];
+
+      const expiredDocuments: string[] = [];
+      const expiringSoonDocuments: string[] = [];
+
+      for (const c of checks) {
+        const date = c.date;
+        if (!date) continue;
+        if (date.getTime() < now.getTime()) {
+          expiredDocuments.push(c.key);
+        } else if (date.getTime() <= future.getTime()) {
+          expiringSoonDocuments.push(c.key);
+        }
+      }
+
+      return {
+        driverId: driver._id.toString(),
+        expiredDocuments,
+        expiringSoonDocuments,
+        checkedAt: now.toISOString(),
+      };
+    } catch (err) {
+      console.error('Error in checkDocumentExpiry:', err);
+      return null;
+    }
+  }
 }

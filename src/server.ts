@@ -6,6 +6,7 @@ import { isEnvDefined } from './utilities/envChecker';
 import { createRedisService } from '@Pick2Me/shared/redis';
 import { connectDB } from '@Pick2Me/shared/mongo';
 import './jobs/worker';
+import { listenForExpiredKeys } from './jobs/check-hardbeat-expiry';
 
 // server
 const startServer = async () => {
@@ -18,6 +19,8 @@ const startServer = async () => {
 
     //creating redis server
     createRedisService(process.env.REDIS_URL as string);
+    //
+    listenForExpiredKeys();
 
     //start rabbit consumer
     // consumer.start()

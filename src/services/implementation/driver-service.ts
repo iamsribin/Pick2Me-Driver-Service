@@ -22,6 +22,7 @@ import {
 } from '@/types';
 import { IDailyStatusRepository } from '@/repositories/interfaces/i-daily-satus-repository';
 import { formatOnlineMinutes } from '@/utilities/formatTime';
+import { HEARTBEAT_PREFIX } from '@Pick2Me/shared/constants';
 
 @injectable()
 export class DriverService implements IDriverService {
@@ -243,6 +244,15 @@ export class DriverService implements IDriverService {
       const driver = await this._driverRepo.findById(driverId);
       if (!driver) throw NotFoundError('driver not found');
 
+      const documents = await this._driverRepo.checkDocumentExpiry(driverId);
+
+      if (goOnline && documents && documents.expiredDocuments.length > 0) {
+        const expiredList = documents.expiredDocuments.join(', ');
+        throw BadRequestError(
+          `Your ${expiredList} ${documents.expiredDocuments.length > 1 ? 'have' : 'has'} expired. Please update before going online.`
+        );
+      }
+
       if (goOnline && driver.isAvailable) {
         throw ConflictError('Driver already online on another device');
       }
@@ -251,6 +261,10 @@ export class DriverService implements IDriverService {
         throw BadRequestError(
           'complete your stripe account verification first! go to wallet tab and complete it'
         );
+      }
+
+      if (driver?.adminCommission && driver?.adminCommission > 5000) {
+        throw BadRequestError('pay the commission before going to online');
       }
 
       if (goOnline) {
@@ -294,6 +308,7 @@ export class DriverService implements IDriverService {
         }
 
         await redis.removeOnlineDriver(driverId);
+        await redis.remove(`${HEARTBEAT_PREFIX}${driverId}`);
 
         await this._driverRepo.update(driverId, {
           onlineStatus: false,
