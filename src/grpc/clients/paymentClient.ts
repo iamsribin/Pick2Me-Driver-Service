@@ -14,3 +14,8 @@ export const createDriverConnectAccountRpc = promisify<
   CreateDriverConnectAccountRequest,
   CreateDriverConnectAccountResponse
 >(paymentClient.createDriverConnectAccount.bind(paymentClient));
+
+export const checkDriverOnboardingStatus = promisify<
+  { driverId: string },
+  { onboardingStatus: boolean }
+>(paymentClient.CheckDriverOnboardingStatus.bind(paymentClient));

@@ -23,6 +23,5 @@ export interface IDriverService {
   ): Promise<IResponse<null>>;
   fetchMainDashboard(driverId: string): Promise<MainDashboardDto>;
   addEarnings(earnings: AddEarningsRequest): Promise<PaymentResponse>;
-  getDriverStripe(driverId: string): Promise<{ status: string; stripeId: string }>;
   increaseCancelCount(payload: increaseCancelCountReq): Promise<void>;
 }

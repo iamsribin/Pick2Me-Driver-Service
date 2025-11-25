@@ -30,8 +30,7 @@ export interface DriverInterface extends Document {
   driverImage: string;
   referralCode: string;
   joiningDate: Date;
-  accountId: string;
-  accountLinkUrl: string;
+  onboardingComplete:boolean;
 
   aadhar: {
     id: string;

@@ -23,6 +23,11 @@ import {
 import { IDailyStatusRepository } from '@/repositories/interfaces/i-daily-satus-repository';
 import { formatOnlineMinutes } from '@/utilities/formatTime';
 import { HEARTBEAT_PREFIX } from '@Pick2Me/shared/constants';
+import {
+  checkDriverOnboardingStatus,
+  createDriverConnectAccountRpc,
+} from '@/grpc/clients/paymentClient';
+import { ServiceError } from '@grpc/grpc-js';
 
 @injectable()
 export class DriverService implements IDriverService {
@@ -257,10 +262,28 @@ export class DriverService implements IDriverService {
         throw ConflictError('Driver already online on another device');
       }
 
-      if (goOnline && driver.accountLinkUrl) {
-        throw BadRequestError(
-          'complete your stripe account verification first! go to wallet tab and complete it'
-        );
+      if (goOnline && !driver.onboardingComplete) {
+        try {
+          // call payment-service RPC onboarding status
+          const connectResult = await checkDriverOnboardingStatus({
+            driverId: driver._id.toString(),
+          });
+
+          this._driverRepo.update(driverId, { onboardingComplete: connectResult.onboardingStatus });
+
+          if (!connectResult.onboardingStatus) {
+            throw BadRequestError(
+              'complete your stripe account verification first! go to wallet tab and complete it'
+            );
+          }
+        } catch (err) {
+          const grpcErr = err as ServiceError;
+          console.error('Failed to create connect account', {
+            driverId: driver._id,
+            error: grpcErr.message,
+          });
+          throw InternalError('Failed to payment account');
+        }
       }
 
       if (driver?.adminCommission && driver?.adminCommission > 5000) {
@@ -277,7 +300,6 @@ export class DriverService implements IDriverService {
           vehicleModel: driver.vehicleDetails?.model,
           driverPhoto: driver.driverImage,
           vehicleNumber: driver.vehicleDetails?.vehicleNumber,
-          stripeId: driver.accountId,
           sessionStart: Date.now(),
           lastSeen: Date.now(),
         };
@@ -372,13 +394,6 @@ export class DriverService implements IDriverService {
         message: (error as Error).message,
       };
     }
-  }
-
-  async getDriverStripe(driverId: string): Promise<{ status: string; stripeId: string }> {
-    const driverData = await this._driverRepo.findById(driverId);
-    if (!driverData) throw new Error('no driver found');
-
-    return { status: 'success', stripeId: driverData.accountId };
   }
 
   async increaseCancelCount(payload: increaseCancelCountReq): Promise<void> {

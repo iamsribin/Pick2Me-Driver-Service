@@ -209,7 +209,7 @@ export class AdminService implements IAdminService {
       }
 
       const redisService = await getRedisService();
-      const isOnline = await redisService.isDriverOnline(request.id);
+      const isOnline = await redisService.getOnlineDriverDetails(request.id);
 
       if (isOnline && request.status === 'Blocked') {
         throw ConflictError('Driver is currently on a ride. Block after ride completion');
@@ -218,10 +218,9 @@ export class AdminService implements IAdminService {
       let connectResult: CreateDriverConnectAccountResponse | null = null;
 
       const shouldCreateAccount =
-        request.status === 'Good' && !!driver.email && !!driver._id && !driver.accountId;
+        request.status === 'Good' && !!driver.email && !!driver._id && !driver.onboardingComplete;
 
       if (shouldCreateAccount) {
-        console.log('calling');
 
         try {
           // call payment-service RPC (idempotency handled by payment service)
@@ -241,9 +240,7 @@ export class AdminService implements IAdminService {
 
       const updateData = {
         accountStatus: request.status,
-        ...(connectResult?.accountId
-          ? { accountId: connectResult.accountId, accountLinkUrl: connectResult.accountLinkUrl }
-          : {}),
+        ...(connectResult?.accountId ? { onboardingComplete: true } : {}),
       };
       console.log('updateData', updateData);
 
