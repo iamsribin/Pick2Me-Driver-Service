@@ -7,6 +7,7 @@ import { createRedisService } from '@Pick2Me/shared/redis';
 import { connectDB } from '@Pick2Me/shared/mongo';
 import './jobs/worker';
 import { listenForExpiredKeys } from './jobs/check-hardbeat-expiry';
+import { EventConsumer } from './events/consumer';
 
 // server
 const startServer = async () => {
@@ -23,7 +24,7 @@ const startServer = async () => {
     listenForExpiredKeys();
 
     //start rabbit consumer
-    // consumer.start()
+    EventConsumer.init();
 
     // start grpc server
     startGrpcServer();

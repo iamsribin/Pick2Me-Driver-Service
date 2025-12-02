@@ -2,7 +2,7 @@ import { DriverDailyStatsInterface } from '@/interface/daily-status.interface';
 import { DriverDailyStats } from '@/model/daily-status.model';
 import { MongoBaseRepository } from '@Pick2Me/shared/mongo';
 import { injectable } from 'inversify';
-import mongoose from 'mongoose';
+import mongoose, { UpdateQuery } from 'mongoose';
 import { IDailyStatusRepository } from '../interfaces/i-daily-satus-repository';
 
 @injectable()
@@ -50,5 +50,22 @@ export class DailyStatusRepository
       { driverId: new mongoose.Types.ObjectId(driverId), date: endDay },
       { $inc: { onlineMinutes: restMinutes } }
     );
+  }
+
+  async incrementTodayRideCount(
+    driverId: string,
+    field: 'completedRides' | 'cancelledRides',
+    increment = 1
+  ): Promise<void> {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    // const date = startOfDay(new Date());
+    const filter = { driverId: new mongoose.Types.ObjectId(driverId), date };
+    const update: UpdateQuery<DriverDailyStatsInterface> = {
+      $inc: { [field]: increment, totalRides: increment } as any,
+      $setOnInsert: { driverId: new mongoose.Types.ObjectId(driverId), date } as any,
+    };
+
+    await this.findOneAndUpdateUpsert(filter, update, { upsert: true, new: true });
   }
 }

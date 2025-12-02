@@ -17,16 +17,13 @@ import { getRedisService } from '@Pick2Me/shared/redis';
 import {
   UpdateDriverDocumentsReq,
   UpdateDriverProfileReq,
-  increaseCancelCountReq,
   AddEarningsRequest,
+  UpdateRideCount,
 } from '@/types';
 import { IDailyStatusRepository } from '@/repositories/interfaces/i-daily-satus-repository';
 import { formatOnlineMinutes } from '@/utilities/formatTime';
 import { HEARTBEAT_PREFIX } from '@Pick2Me/shared/constants';
-import {
-  checkDriverOnboardingStatus,
-  createDriverConnectAccountRpc,
-} from '@/grpc/clients/paymentClient';
+import { checkDriverOnboardingStatus } from '@/grpc/clients/paymentClient';
 import { ServiceError } from '@grpc/grpc-js';
 
 @injectable()
@@ -180,62 +177,6 @@ export class DriverService implements IDriverService {
       });
     }
   }
-
-  // async handleOnlineChange(data: handleOnlineChangeReq): Promise<IResponse<null>> {
-  //   try {
-  //     console.log('handleOnlineChange data:', data);
-
-  //     const driver = await this._driverRepo.findById(data.driverId);
-  //     if (!driver) {
-  //       throw NotFoundError('Driver not found');
-  //     }
-
-  //     const redisService = getRedisService();
-
-  //     // If going offline → calculate hours
-  //     if (!data.online && data.onlineTimestamp) {
-  //       const onlineDurationMs = Date.now() - new Date(data.onlineTimestamp).getTime();
-  //       const hours = Math.round((onlineDurationMs / (1000 * 60 * 60)) * 100) / 100;
-  //       await this._driverRepo.updateOnlineHours(data.driverId, hours);
-
-  //       redisService.removeOnlineDriver(data.driverId);
-  //     }
-
-  //     // If going online → add/update Redis
-  //     if (data.online) {
-  //       const driverDetails = {
-  //         driverId: data.driverId,
-  //         driverNumber: driver.mobile.toString(),
-  //         name: driver.name,
-  //         cancelledRides: driver.totalCancelledRides || 0,
-  //         rating: driver.totalRatings || 0,
-  //         vehicleModel: driver.vehicleDetails.model,
-  //         driverPhoto: driver.driverImage,
-  //         vehicleNumber: driver.vehicleDetails.vehicleNumber,
-  //         stripeId: driver.accountId,
-  //         stripeLinkUrl: driver.accountLinkUrl,
-  //       };
-
-  //       await redisService.addDriverGeo(data.driverId, data.location.lng, data.location.lat);
-  //       await redisService.setHeartbeat(data.driverId);
-  //       // await redisService.isDriverOnline(driverDetails);
-  //     }
-  //     await this._driverRepo.updateOne(
-  //       { _id: data.driverId },
-  //       { $set: { onlineStatus: data.online } }
-  //     );
-
-  //     return { status: StatusCode.OK, message: 'Driver status updated' };
-  //   } catch (error: unknown) {
-  //     if (error instanceof HttpError) throw error;
-
-  //     throw InternalError('', {
-  //       details: {
-  //         cause: error instanceof Error ? error.message : String(error),
-  //       },
-  //     });
-  //   }
-  // }
 
   public async toggleOnline(driverId: string, goOnline: boolean, lat?: number, lng?: number) {
     try {
@@ -396,15 +337,21 @@ export class DriverService implements IDriverService {
     }
   }
 
-  async increaseCancelCount(payload: increaseCancelCountReq): Promise<void> {
+  async updateRideCount(payload: UpdateRideCount): Promise<void> {
     try {
-      console.log('payload', payload);
+      console.log('akjfl');
 
-      await this._driverRepo.increaseCancelCount(payload.driverId);
-      console.log(`✅ Cancel count increased for driver ${payload.driverId}`);
+      if (payload.status === 'COMPLETED') {
+        await this._driverRepo.update(payload.driverId, { $inc: { totalCompletedRides: 1 } });
+        await this._dailyStatusRepo.incrementTodayRideCount(payload.driverId, 'completedRides', 1);
+        console.log('upated');
+      } else if (payload.status === 'CANCELLED') {
+        await this._driverRepo.update(payload.driverId, { $inc: { totalCancelledRides: 1 } });
+        await this._dailyStatusRepo.incrementTodayRideCount(payload.driverId, 'cancelledRides', 1);
+      }
     } catch (error) {
-      console.log('❌ error in increaseCancelCount', error);
-      throw error;
+      if (error instanceof HttpError) throw error;
+      InternalError('something went wrong');
     }
   }
 }

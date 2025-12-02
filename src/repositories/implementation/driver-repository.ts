@@ -1,4 +1,4 @@
-import { FilterQuery, UpdateQuery } from 'mongoose';
+import mongoose, { FilterQuery, UpdateQuery } from 'mongoose';
 import { injectable } from 'inversify';
 import { DriverInterface } from '@/interface/driver.interface';
 import { DriverModel } from '@/model/driver.model';
@@ -237,47 +237,47 @@ export class DriverRepository
     }
   }
 
-  async increaseCancelCount(driverId: string): Promise<void | null> {
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // normalize to midnight
+  // async increaseCancelCount(driverId: string): Promise<void | null> {
+  //   try {
+  //     const today = new Date();
+  //     today.setHours(0, 0, 0, 0); // normalize to midnight
 
-      const driver = await DriverModel.findOne({
-        _id: driverId,
-        'rideDetails.date': { $gte: today },
-      });
+  //     const driver = await DriverModel.findOne({
+  //       _id: driverId,
+  //       'rideDetails.date': { $gte: today },
+  //     });
 
-      if (driver) {
-        await DriverModel.updateOne(
-          { _id: driverId, 'rideDetails.date': { $gte: today } },
-          {
-            $inc: {
-              totalCancelledRides: 1,
-              'rideDetails.$.cancelledRides': 1,
-            },
-          }
-        );
-      } else {
-        await DriverModel.updateOne(
-          { _id: driverId },
-          {
-            $inc: { totalCancelledRides: 1 },
-            $push: {
-              rideDetails: {
-                completedRides: 0,
-                cancelledRides: 1,
-                Earnings: 0,
-                hour: 0,
-                date: new Date(),
-              },
-            },
-          }
-        );
-      }
-    } catch {
-      return null;
-    }
-  }
+  //     if (driver) {
+  //       await DriverModel.updateOne(
+  //         { _id: driverId, 'rideDetails.date': { $gte: today } },
+  //         {
+  //           $inc: {
+  //             totalCancelledRides: 1,
+  //             'rideDetails.$.cancelledRides': 1,
+  //           },
+  //         }
+  //       );
+  //     } else {
+  //       await DriverModel.updateOne(
+  //         { _id: driverId },
+  //         {
+  //           $inc: { totalCancelledRides: 1 },
+  //           $push: {
+  //             rideDetails: {
+  //               completedRides: 0,
+  //               cancelledRides: 1,
+  //               Earnings: 0,
+  //               hour: 0,
+  //               date: new Date(),
+  //             },
+  //           },
+  //         }
+  //       );
+  //     }
+  //   } catch {
+  //     return null;
+  //   }
+  // }
 
   async addEarnings(data: AddEarningsRequest) {
     try {

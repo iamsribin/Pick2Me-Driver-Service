@@ -26,7 +26,7 @@ export interface IDriverRepository extends IMongoBaseRepository<DriverInterface>
   vehicleInsurancePollutionUpdate(data: InsuranceUpdateQuery): Promise<DriverInterface | null>;
   getDocuments(id: string): Promise<DriverInterface | null>;
   updateOnlineHours(driverId: string, hoursToAdd: number): Promise<void | null>;
-  increaseCancelCount(driverId: string): Promise<void | null>;
+  // increaseCancelCount(driverId: string): Promise<void | null>;
   addEarnings(data: AddEarningsRequest): Promise<DriverInterface | null>;
   checkDocumentExpiry(driverId: string): Promise<{
     driverId: string;

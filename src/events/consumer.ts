@@ -1,53 +1,35 @@
-// import { createChannel, QUEUES } from '@Pick2Me/shared';
-// import { Channel } from 'amqplib';
-// import { container } from '../config/inversify.config';
-// import { IDriverController } from '../controllers/interfaces/i-driver-controller';
-// import { TYPES } from '../types/inversify-types';
+import { container } from '@/config/inversify.config';
+import { IDriverService } from '@/services/interfaces/i-driver-service';
+import { TYPES } from '@/types/inversify-types';
+import { EXCHANGES, QUEUES, RabbitMQ, ROUTING_KEYS } from '@Pick2Me/shared/messaging';
+const driverService = container.get<IDriverService>(TYPES.DriverService);
+export class EventConsumer {
+  static async init() {
+    await RabbitMQ.connect({
+      url: process.env.RABBIT_URL!,
+      serviceName: 'driver-service',
+    });
 
-// const driverController = container.get<IDriverController>(TYPES.DriverController);
+    await RabbitMQ.setupExchange(EXCHANGES.NOTIFICATION, 'topic');
 
-// class DriverConsumer {
-//   private ch?: Channel;
+    await RabbitMQ.bindQueueToExchanges(QUEUES.DRIVER_QUEUE, [
+      {
+        exchange: EXCHANGES.NOTIFICATION,
+        routingKeys: ['realtime-driver.#'],
+      },
+    ]);
 
-//   constructor(private driverController: IDriverController) {}
+    await RabbitMQ.consume(QUEUES.DRIVER_QUEUE, async (msg) => {
+      switch (msg.type) {
+        case ROUTING_KEYS.UPDATE_DRIVER_RIDE_COUNT:
+          console.log('INCREASE_DRIVER_RIDE_COUNT:', msg.data);
+          driverService.updateRideCount(msg.data);
+          break;
+        default:
+          console.warn('Unknown message:', msg);
+      }
+    });
+  }
+}
 
-//   async start() {
-//     try {
-//       const RABBIT_URL = process.env.RABBIT_URL!;
-//       const ch = await createChannel(RABBIT_URL);
-//       this.ch = ch;
-
-//       console.log('🚀 Driver service started with RabbitMQ consumers');
-
-//       // Driver rejection handler
-//       await ch.consume(QUEUES.driver.rejection, async (msg) => {
-//         if (!msg) return;
-//         try {
-//           const payload = JSON.parse(msg.content.toString());
-//           console.log('📩 driver.rejection payload:', payload);
-
-//           await this.driverController.increaseCancelCount(payload);
-//           ch.ack(msg);
-//         } catch (err) {
-//           console.error('❌ driver.rejection handler error:', err);
-//           ch.nack(msg, false, false);
-//         }
-//       });
-//     } catch (err) {
-//       console.log(err);
-
-//       process.exit(1);
-//     }
-//   }
-
-//   async stop() {
-//     try {
-//       if (this.ch) await this.ch.close();
-//       console.log('✅ Driver consumer channel closed');
-//     } catch (err) {
-//       console.error('❌ Error stopping driver consumer:', err);
-//     }
-//   }
-// }
-
-// export const consumer = new DriverConsumer(driverController);
+// INCREASE_DRIVER_RIDE_COUNT: { driverId: '68933743b49a8cf584ff3ef5', status: 'ACCEPT' }

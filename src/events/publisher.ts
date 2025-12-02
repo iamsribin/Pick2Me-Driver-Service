@@ -24,6 +24,6 @@ export class DriverEventProducer {
       ROUTING_KEYS.NOTIFY_DOCUMENT_EXPIRE,
       notificationPayload
     );
-    console.log(`[Driver ser] 📤 Published notificatio → ${notificationPayload}`);
+    console.log(`[Driver ser] 📤 Published notification → ${notificationPayload}`);
   }
 }

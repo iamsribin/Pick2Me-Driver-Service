@@ -59,16 +59,6 @@ export interface UpdateDriverDocumentsReq {
   updates: SectionUpdates;
 }
 
-export interface handleOnlineChangeReq {
-  online: boolean;
-  driverId: string;
-  onlineTimestamp: Date;
-  location: {
-    lat: number;
-    lng: number;
-  };
-}
-
 export interface AddEarningsRequest {
   driverId: string;
   adminShare: string;
@@ -76,10 +66,7 @@ export interface AddEarningsRequest {
   transactionId: string;
 }
 
-export interface increaseCancelCountReq {
+export interface UpdateRideCount {
   driverId: string;
-  bookingId: string;
-  requestId: string;
-  reason: string;
-  timestamp: Date;
+  status: string;
 }
