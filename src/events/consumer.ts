@@ -11,11 +11,16 @@ export class EventConsumer {
     });
 
     await RabbitMQ.setupExchange(EXCHANGES.NOTIFICATION, 'topic');
+    await RabbitMQ.setupExchange(EXCHANGES.PAYMENT, 'topic');
 
     await RabbitMQ.bindQueueToExchanges(QUEUES.DRIVER_QUEUE, [
       {
         exchange: EXCHANGES.NOTIFICATION,
         routingKeys: ['realtime-driver.#'],
+      },
+      {
+        exchange: EXCHANGES.PAYMENT,
+        routingKeys: ['payment-driver.#'],
       },
     ]);
 
@@ -24,6 +29,9 @@ export class EventConsumer {
         case ROUTING_KEYS.UPDATE_DRIVER_RIDE_COUNT:
           console.log('INCREASE_DRIVER_RIDE_COUNT:', msg.data);
           driverService.updateRideCount(msg.data);
+          break;
+        case ROUTING_KEYS.UPDATE_DRIVER_EARNINGS:
+          console.log('UPDATE_DRIVER_EARNINGS:', msg.data);
           break;
         default:
           console.warn('Unknown message:', msg);

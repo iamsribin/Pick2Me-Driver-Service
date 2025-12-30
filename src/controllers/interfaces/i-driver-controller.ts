@@ -1,6 +1,6 @@
 import { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js';
 import { NextFunction, Request, Response } from 'express';
-import { AddEarningsRequest, increaseCancelCountReq } from '@/types';
+import { AddEarningsRequest } from '@/types';
 import { PaymentResponse } from '@/types/driver-type/response-type';
 
 export interface IDriverController {
@@ -19,9 +19,9 @@ export interface IDriverController {
     callback: sendUnaryData<PaymentResponse>
   ): Promise<void>;
 
-  getDriverStripe(
-    call: ServerUnaryCall<{ driverId: string }, { status: string; stripeId: string }>,
-    callback: sendUnaryData<{ status: string; stripeId: string }>
-  ): Promise<void>;
-  increaseCancelCount(payload: increaseCancelCountReq): Promise<void>;
+  // getDriverStripe(
+  //   call: ServerUnaryCall<{ driverId: string }, { status: string; stripeId: string }>,
+  //   callback: sendUnaryData<{ status: string; stripeId: string }>
+  // ): Promise<void>;
+  // increaseCancelCount(payload: increaseCancelCountReq): Promise<void>;
 }

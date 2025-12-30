@@ -339,13 +339,11 @@ export class DriverService implements IDriverService {
 
   async updateRideCount(payload: UpdateRideCount): Promise<void> {
     try {
-      console.log('akjfl');
 
       if (payload.status === 'COMPLETED') {
         await this._driverRepo.update(payload.driverId, { $inc: { totalCompletedRides: 1 } });
         await this._dailyStatusRepo.incrementTodayRideCount(payload.driverId, 'completedRides', 1);
-        console.log('upated');
-      } else if (payload.status === 'CANCELLED') {
+      } else if (payload.status === 'DECLINE') {
         await this._driverRepo.update(payload.driverId, { $inc: { totalCancelledRides: 1 } });
         await this._dailyStatusRepo.incrementTodayRideCount(payload.driverId, 'cancelledRides', 1);
       }

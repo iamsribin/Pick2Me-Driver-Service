@@ -9,7 +9,7 @@ import { PaymentResponse } from '@/types/driver-type/response-type';
 import { BadRequestError } from '@Pick2Me/shared/errors';
 import { StatusCode } from '@Pick2Me/shared/interfaces';
 import { recursivelySignImageUrls } from '@/utilities/createImageUrl';
-import { AddEarningsRequest, increaseCancelCountReq, SectionUpdates } from '@/types';
+import { AddEarningsRequest, SectionUpdates } from '@/types';
 
 @injectable()
 export class DriverController implements IDriverController {
@@ -173,43 +173,43 @@ export class DriverController implements IDriverController {
     }
   };
 
-  getDriverStripe = async (
-    call: ServerUnaryCall<{ driverId: string }, { status: string; stripeId: string }>,
-    callback: sendUnaryData<{ status: string; stripeId: string }>
-  ): Promise<void> => {
-    try {
-      const response = await this._driverService.getDriverStripe(call.request.driverId);
-      callback(null, response);
-    } catch (error) {
-      console.log(error);
-      callback(null, { status: 'failed', stripeId: '' });
-    }
-  };
+  // getDriverStripe = async (
+  //   call: ServerUnaryCall<{ driverId: string }, { status: string; stripeId: string }>,
+  //   callback: sendUnaryData<{ status: string; stripeId: string }>
+  // ): Promise<void> => {
+  //   try {
+  //     const response = await this._driverService.getDriverStripe(call.request.driverId);
+  //     callback(null, response);
+  //   } catch (error) {
+  //     console.log(error);
+  //     callback(null, { status: 'failed', stripeId: '' });
+  //   }
+  // };
 
-  uploadChatFile = async (req: Request, res: Response) => {
-    try {
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+  // uploadChatFile = async (req: Request, res: Response) => {
+  //   try {
+  //     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-      if (!files || !files['file'] || !files['file'].length) {
-        return res.status(400).json({ message: 'No file provided' });
-      }
+  //     if (!files || !files['file'] || !files['file'].length) {
+  //       return res.status(400).json({ message: 'No file provided' });
+  //     }
 
-      const file = files['file'][0];
-      const url = await uploadToS3Public(file);
-      return res.status(202).json({ message: 'success', fileUrl: url });
-    } catch (error) {
-      console.log('error', error);
-      res.status(StatusCode.InternalServerError).json({
-        message: 'Internal Server Error',
-      });
-    }
-  };
+  //     const file = files['file'][0];
+  //     const url = await uploadToS3Public(file);
+  //     return res.status(202).json({ message: 'success', fileUrl: url });
+  //   } catch (error) {
+  //     console.log('error', error);
+  //     res.status(StatusCode.InternalServerError).json({
+  //       message: 'Internal Server Error',
+  //     });
+  //   }
+  // };
 
-  increaseCancelCount = async (payload: increaseCancelCountReq): Promise<void> => {
-    try {
-      await this._driverService.increaseCancelCount(payload);
-    } catch (error) {
-      console.log('error', error);
-    }
-  };
+  // increaseCancelCount = async (payload: increaseCancelCountReq): Promise<void> => {
+  //   try {
+  //     await this._driverService.increaseCancelCount(payload);
+  //   } catch (error) {
+  //     console.log('error', error);
+  //   }
+  // };
 }

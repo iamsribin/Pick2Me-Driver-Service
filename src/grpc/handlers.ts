@@ -9,6 +9,6 @@ export function createDriverHandlers(controllers: Handlers) {
 
   return {
     AddEarnings: driverController.AddEarnings.bind(driverController),
-    getDriverStripe: driverController.getDriverStripe.bind(driverController),
+    // getDriverStripe: driverController.getDriverStripe.bind(driverController),
   };
 }
