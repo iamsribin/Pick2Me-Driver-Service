@@ -61,9 +61,11 @@ export interface UpdateDriverDocumentsReq {
 
 export interface AddEarningsRequest {
   driverId: string;
-  adminShare: string;
-  driverShare: string;
-  transactionId: string;
+  platformFee: bigint;
+  driverShare: bigint;
+  userId: string;
+  bookingId: string;
+  isAddCommission: boolean;
 }
 
 export interface UpdateRideCount {

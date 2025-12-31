@@ -23,8 +23,21 @@ export class DriverController implements IDriverController {
       res.setHeader('Cache-Control', 'no-store, no-cache');
 
       const user = req.gatewayUser!;
+      console.log(user);
 
       const response = await this._driverService.fetchDriverProfile(user.id);
+      console.log(response);
+
+      const sample: AddEarningsRequest = {
+        driverId: user.id,
+        userId: user.id,
+        driverShare: 300n,
+        platformFee: 900n,
+        bookingId: user.id,
+        isAddCommission: true,
+      };
+      const dd = await this._driverService.addEarnings(sample);
+      console.log(dd);
 
       res.status(+response.status).json(response.data);
     } catch (error) {
@@ -157,21 +170,21 @@ export class DriverController implements IDriverController {
     }
   };
 
-  AddEarnings = async (
-    call: ServerUnaryCall<AddEarningsRequest, PaymentResponse>,
-    callback: sendUnaryData<PaymentResponse>
-  ): Promise<void> => {
-    try {
-      const response = await this._driverService.addEarnings(call.request);
-      callback(null, response);
-    } catch (error) {
-      console.log(error);
-      callback(null, {
-        status: 'failed',
-        message: (error as Error).message,
-      });
-    }
-  };
+  // AddEarnings = async (
+  //   call: ServerUnaryCall<AddEarningsRequest, PaymentResponse>,
+  //   callback: sendUnaryData<PaymentResponse>
+  // ): Promise<void> => {
+  //   try {
+  //     const response = await this._driverService.addEarnings(call.request);
+  //     callback(null, response);
+  //   } catch (error) {
+  //     console.log(error);
+  //     callback(null, {
+  //       status: 'failed',
+  //       message: (error as Error).message,
+  //     });
+  //   }
+  // };
 
   // getDriverStripe = async (
   //   call: ServerUnaryCall<{ driverId: string }, { status: string; stripeId: string }>,

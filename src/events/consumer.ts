@@ -32,6 +32,7 @@ export class EventConsumer {
           break;
         case ROUTING_KEYS.UPDATE_DRIVER_EARNINGS:
           console.log('UPDATE_DRIVER_EARNINGS:', msg.data);
+          driverService.addEarnings(msg.data);
           break;
         default:
           console.warn('Unknown message:', msg);

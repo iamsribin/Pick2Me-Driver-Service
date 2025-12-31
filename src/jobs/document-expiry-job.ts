@@ -93,8 +93,6 @@ function get(obj: any, path: string) {
   return path.split('.').reduce((acc: any, p: string) => (acc ? acc[p] : undefined), obj);
 }
 
-
-
 // notificationPayload {
 //   messageId: 'f6ac9a9a-2c08-4efc-9bac-0e00cad02a7e',
 //   receiverId: '68933743b49a8cf584ff3ef5',

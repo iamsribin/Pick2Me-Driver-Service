@@ -88,6 +88,6 @@ const DriverSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-DriverSchema.index({ location: '2dsphere' });
+// DriverSchema.index({ location: '2dsphere' });
 
 export const DriverModel = mongoose.model<DriverInterface>('Driver', DriverSchema);

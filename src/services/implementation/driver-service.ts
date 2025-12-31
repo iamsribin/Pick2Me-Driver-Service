@@ -25,6 +25,7 @@ import { formatOnlineMinutes } from '@/utilities/formatTime';
 import { HEARTBEAT_PREFIX } from '@Pick2Me/shared/constants';
 import { checkDriverOnboardingStatus } from '@/grpc/clients/paymentClient';
 import { ServiceError } from '@grpc/grpc-js';
+import mongoose from 'mongoose';
 
 @injectable()
 export class DriverService implements IDriverService {
@@ -314,32 +315,74 @@ export class DriverService implements IDriverService {
     }
   }
 
-  async addEarnings(earnings: AddEarningsRequest): Promise<PaymentResponse> {
+  async addEarnings(earnings: AddEarningsRequest): Promise<void> {
+    const { driverId, platformFee, driverShare, isAddCommission } = earnings;
+
+    if (!driverId || !mongoose.Types.ObjectId.isValid(driverId)) {
+      throw BadRequestError('Invalid driverId');
+    }
+
+    const platformFeeInt = Number(platformFee ?? 0);
+    const driverShareInt = Number(driverShare ?? 0);
+    if (!Number.isFinite(platformFeeInt) || !Number.isFinite(driverShareInt)) {
+      throw BadRequestError('Invalid fee values');
+    }
+    if (driverShareInt < 0 || platformFeeInt < 0) {
+      throw BadRequestError('Fee values must be non-negative');
+    }
+
+    const session = await mongoose.startSession();
     try {
-      const res = await this._driverRepo.addEarnings(earnings);
+      await session.withTransaction(
+        async () => {
+          const driverObjectId = new mongoose.Types.ObjectId(driverId);
 
-      if (!res)
-        return {
-          status: 'failed',
-          message: 'driver not found',
-        };
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
 
-      return {
-        status: 'success',
-        message: 'Earnings added successfully',
-      };
-    } catch (error) {
-      console.error('Error in addEarnings:', error);
-      return {
-        status: 'failed',
-        message: (error as Error).message,
-      };
+          await this._dailyStatusRepo.findOneAndUpdateUpsert(
+            { driverId: driverObjectId, date: today },
+            {
+              $inc: {
+                completedRides: 1,
+                earningsInPaise: driverShareInt,
+              },
+              $setOnInsert: { driverId: driverObjectId, date: today },
+            },
+            { session }
+          );
+
+          const driverUpdate: any = { $inc: { totalCompletedRides: 1 } };
+          if (isAddCommission) {
+            driverUpdate.$inc.adminCommission = platformFeeInt;
+          }
+
+          const updatedDriver = await this._driverRepo.updateOne(
+            { _id: driverObjectId },
+            driverUpdate,
+            { session }
+          );
+
+          if (!updatedDriver) {
+            // rollback by throwing inside transaction
+            throw NotFoundError('Driver not found');
+          }
+        },
+        {
+          // readPreference: 'primary'
+        }
+      );
+    } catch (err) {
+      if (err instanceof HttpError) throw err;
+      console.error('addEarnings failed:', err);
+      throw InternalError('something went wrong');
+    } finally {
+      session.endSession();
     }
   }
 
   async updateRideCount(payload: UpdateRideCount): Promise<void> {
     try {
-
       if (payload.status === 'COMPLETED') {
         await this._driverRepo.update(payload.driverId, { $inc: { totalCompletedRides: 1 } });
         await this._dailyStatusRepo.incrementTodayRideCount(payload.driverId, 'completedRides', 1);

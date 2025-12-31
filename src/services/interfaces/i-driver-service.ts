@@ -20,6 +20,6 @@ export interface IDriverService {
     lng?: number
   ): Promise<IResponse<null>>;
   fetchMainDashboard(driverId: string): Promise<MainDashboardDto>;
-  addEarnings(earnings: AddEarningsRequest): Promise<PaymentResponse>;
+  addEarnings(earnings: AddEarningsRequest): Promise<void>;
   updateRideCount(payload: UpdateRideCount): Promise<void>;
 }

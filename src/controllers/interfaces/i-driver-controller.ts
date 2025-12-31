@@ -14,10 +14,10 @@ export interface IDriverController {
 
   handleOnlineChange(req: Request, res: Response, _next: NextFunction): Promise<void>;
 
-  AddEarnings(
-    call: ServerUnaryCall<AddEarningsRequest, PaymentResponse>,
-    callback: sendUnaryData<PaymentResponse>
-  ): Promise<void>;
+  // AddEarnings(
+  //   call: ServerUnaryCall<AddEarningsRequest, PaymentResponse>,
+  //   callback: sendUnaryData<PaymentResponse>
+  // ): Promise<void>;
 
   // getDriverStripe(
   //   call: ServerUnaryCall<{ driverId: string }, { status: string; stripeId: string }>,

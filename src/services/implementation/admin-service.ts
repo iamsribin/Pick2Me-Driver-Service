@@ -221,7 +221,6 @@ export class AdminService implements IAdminService {
         request.status === 'Good' && !!driver.email && !!driver._id && !driver.onboardingComplete;
 
       if (shouldCreateAccount) {
-
         try {
           // call payment-service RPC (idempotency handled by payment service)
           connectResult = await createDriverConnectAccountRpc({

@@ -1,12 +1,10 @@
-import mongoose, { FilterQuery, UpdateQuery } from 'mongoose';
+import { FilterQuery, UpdateQuery } from 'mongoose';
 import { injectable } from 'inversify';
 import { DriverInterface } from '@/interface/driver.interface';
 import { DriverModel } from '@/model/driver.model';
 import { IDriverRepository } from '../interfaces/i-driver-repository';
-import { NotFoundError } from '@Pick2Me/shared/errors';
 import { MongoBaseRepository } from '@Pick2Me/shared/mongo';
 import {
-  AddEarningsRequest,
   IdentificationUpdateQuery,
   InsuranceUpdateQuery,
   LocationUpdateReq,
@@ -201,41 +199,41 @@ export class DriverRepository
     }
   }
 
-  async updateOnlineHours(driverId: string, hoursToAdd: number): Promise<void | null> {
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+  // async updateOnlineHours(driverId: string, hoursToAdd: number): Promise<void | null> {
+  //   try {
+  //     const today = new Date();
+  //     today.setHours(0, 0, 0, 0);
 
-      const driver = await DriverModel.findOne({
-        _id: driverId,
-        'rideDetails.date': { $gte: today },
-      });
+  //     const driver = await DriverModel.findOne({
+  //       _id: driverId,
+  //       'rideDetails.date': { $gte: today },
+  //     });
 
-      if (driver) {
-        await DriverModel.updateOne(
-          { _id: driverId, 'rideDetails.date': { $gte: today } },
-          { $inc: { 'rideDetails.$.hour': hoursToAdd } }
-        );
-      } else {
-        await DriverModel.updateOne(
-          { _id: driverId },
-          {
-            $push: {
-              rideDetails: {
-                completedRides: 0,
-                cancelledRides: 0,
-                Earnings: 0,
-                hour: hoursToAdd,
-                date: new Date(),
-              },
-            },
-          }
-        );
-      }
-    } catch {
-      return null;
-    }
-  }
+  //     if (driver) {
+  //       await DriverModel.updateOne(
+  //         { _id: driverId, 'rideDetails.date': { $gte: today } },
+  //         { $inc: { 'rideDetails.$.hour': hoursToAdd } }
+  //       );
+  //     } else {
+  //       await DriverModel.updateOne(
+  //         { _id: driverId },
+  //         {
+  //           $push: {
+  //             rideDetails: {
+  //               completedRides: 0,
+  //               cancelledRides: 0,
+  //               Earnings: 0,
+  //               hour: hoursToAdd,
+  //               date: new Date(),
+  //             },
+  //           },
+  //         }
+  //       );
+  //     }
+  //   } catch {
+  //     return null;
+  //   }
+  // }
 
   // async increaseCancelCount(driverId: string): Promise<void | null> {
   //   try {
@@ -279,55 +277,55 @@ export class DriverRepository
   //   }
   // }
 
-  async addEarnings(data: AddEarningsRequest) {
-    try {
-      const { driverId, adminShare, driverShare } = data;
+  // async addEarnings(data: AddEarningsRequest) {
+  //   try {
+  //     const { driverId, platformFee, driverShare } = data;
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
+  //     const today = new Date();
+  //     today.setHours(0, 0, 0, 0);
+  //     const endOfDay = new Date();
+  //     endOfDay.setHours(23, 59, 59, 999);
 
-      const updated = await DriverModel.findOneAndUpdate(
-        {
-          _id: driverId,
-          'rideDetails.date': { $gte: today, $lte: endOfDay },
-        },
-        {
-          $inc: {
-            'rideDetails.$.Earnings': Number(driverShare),
-            adminCommission: Number(adminShare),
-          },
-        },
-        { new: true }
-      ).exec();
+  //     const updated = await DriverModel.findOneAndUpdate(
+  //       {
+  //         _id: driverId,
+  //         'rideDetails.date': { $gte: today, $lte: endOfDay },
+  //       },
+  //       {
+  //         $inc: {
+  //           'rideDetails.$.Earnings': Number(driverShare),
+  //           adminCommission: Number(adminShare),
+  //         },
+  //       },
+  //       { new: true }
+  //     ).exec();
 
-      if (updated) return updated;
+  //     if (updated) return updated;
 
-      const pushed = await DriverModel.findOneAndUpdate(
-        { _id: driverId },
-        {
-          $inc: { adminCommission: Number(adminShare) },
-          $push: {
-            rideDetails: {
-              Earnings: Number(driverShare),
-              date: new Date(),
-              completedRides: 0,
-              cancelledRides: 0,
-              hour: 0,
-            },
-          },
-        },
-        { new: true }
-      ).exec();
+  //     const pushed = await DriverModel.findOneAndUpdate(
+  //       { _id: driverId },
+  //       {
+  //         $inc: { adminCommission: Number(adminShare) },
+  //         $push: {
+  //           rideDetails: {
+  //             Earnings: Number(driverShare),
+  //             date: new Date(),
+  //             completedRides: 0,
+  //             cancelledRides: 0,
+  //             hour: 0,
+  //           },
+  //         },
+  //       },
+  //       { new: true }
+  //     ).exec();
 
-      if (!pushed) throw NotFoundError('Driver not found');
+  //     if (!pushed) throw NotFoundError('Driver not found');
 
-      return pushed;
-    } catch {
-      return null;
-    }
-  }
+  //     return pushed;
+  //   } catch {
+  //     return null;
+  //   }
+  // }
 
   async checkDocumentExpiry(
     driverId: string,

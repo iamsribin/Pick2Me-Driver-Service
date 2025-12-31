@@ -30,7 +30,7 @@ export interface DriverInterface extends Document {
   driverImage: string;
   referralCode: string;
   joiningDate: Date;
-  onboardingComplete:boolean;
+  onboardingComplete: boolean;
 
   aadhar: {
     id: string;
@@ -84,8 +84,8 @@ export interface DriverInterface extends Document {
   totalRatings?: number;
   ratingSum?: number;
 
-  lastExpiryNotificationAt?:Date,
-  lastExpiryNotificationFor?: [string],
+  lastExpiryNotificationAt?: Date;
+  lastExpiryNotificationFor?: [string];
 
   createdAt?: Date;
   updatedAt?: Date;
