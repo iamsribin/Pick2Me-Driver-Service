@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import { authRouter } from '@/routes/authRoutes';
 import { driverRouter } from '@/routes/driverRoutes';
 import { adminRouter } from '@/routes/adminRoutes';
-import { errorHandler } from '@Pick2Me/shared/errors';
+import { errorHandler } from '@pick2me/shared/errors';
 
 const app = express();
 

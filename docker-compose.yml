@@ -1,0 +1,17 @@
+services:
+  driver-service:
+    image: pick2me-driver-service:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: driver-service
+    env_file:
+      - .env
+    ports:
+      - "3002:3002"
+    networks:
+      - miro-backend
+
+networks:
+  miro-backend:
+    external: true

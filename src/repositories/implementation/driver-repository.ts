@@ -3,7 +3,7 @@ import { injectable } from 'inversify';
 import { DriverInterface } from '@/interface/driver.interface';
 import { DriverModel } from '@/model/driver.model';
 import { IDriverRepository } from '../interfaces/i-driver-repository';
-import { MongoBaseRepository } from '@Pick2Me/shared/mongo';
+import { MongoBaseRepository } from '@pick2me/shared/mongo';
 import {
   IdentificationUpdateQuery,
   InsuranceUpdateQuery,

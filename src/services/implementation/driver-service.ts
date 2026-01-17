@@ -11,18 +11,19 @@ import {
   HttpError,
   InternalError,
   NotFoundError,
-} from '@Pick2Me/shared/errors';
-import { IResponse, OnlineDriverDetails, StatusCode } from '@Pick2Me/shared/interfaces';
-import { getRedisService } from '@Pick2Me/shared/redis';
+} from '@pick2me/shared/errors';
+import { commonRes, IResponse, OnlineDriverDetails, StatusCode } from '@pick2me/shared/interfaces';
+import { getRedisService } from '@pick2me/shared/redis';
 import {
   UpdateDriverDocumentsReq,
   UpdateDriverProfileReq,
   AddEarningsRequest,
   UpdateRideCount,
+  FilterType,
 } from '@/types';
 import { IDailyStatusRepository } from '@/repositories/interfaces/i-daily-satus-repository';
 import { formatOnlineMinutes } from '@/utilities/formatTime';
-import { HEARTBEAT_PREFIX } from '@Pick2Me/shared/constants';
+import { HEARTBEAT_PREFIX } from '@pick2me/shared/constants';
 import { checkDriverOnboardingStatus } from '@/grpc/clients/paymentClient';
 import { ServiceError } from '@grpc/grpc-js';
 import mongoose from 'mongoose';
@@ -35,7 +36,21 @@ export class DriverService implements IDriverService {
 
     @inject(TYPES.DailyStatusRepository)
     private _dailyStatusRepo: IDailyStatusRepository
-  ) {}
+  ) { }
+
+  async getDriverStats(driverId: string, filter: FilterType = 'month') {
+    try {
+      const stats = await this._dailyStatusRepo.getDriverStats(driverId, filter);
+      return stats;
+    } catch (error) {
+      if (error instanceof HttpError) throw error;
+      throw InternalError('', {
+        details: {
+          cause: error instanceof Error ? error.message : String(error),
+        },
+      });
+    }
+  }
 
   async fetchDriverProfile(id: string): Promise<IResponse<DriverProfileDTO>> {
     const response = await this._driverRepo.findById(id);
@@ -315,7 +330,7 @@ export class DriverService implements IDriverService {
     }
   }
 
-  async addEarnings(earnings: AddEarningsRequest): Promise<void> {
+  async addEarnings(earnings: AddEarningsRequest): Promise<commonRes> {
     const { driverId, platformFee, driverShare, isAddCommission } = earnings;
 
     if (!driverId || !mongoose.Types.ObjectId.isValid(driverId)) {
@@ -372,6 +387,10 @@ export class DriverService implements IDriverService {
           // readPreference: 'primary'
         }
       );
+      return {
+        message: 'success',
+        status: StatusCode.OK,
+      };
     } catch (err) {
       if (err instanceof HttpError) throw err;
       console.error('addEarnings failed:', err);

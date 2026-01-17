@@ -2,7 +2,7 @@ import { IRegisterController } from '../interfaces/i-register-controller';
 import { IRegistrationService } from '@/services/interfaces/i-registration-service';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/types/inversify-types';
-import { BadRequestError } from '@Pick2Me/shared/errors';
+import { BadRequestError } from '@pick2me/shared/errors';
 import { NextFunction, Request, Response } from 'express';
 
 @injectable()

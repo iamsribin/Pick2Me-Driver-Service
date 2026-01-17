@@ -1,8 +1,10 @@
 import { container } from '@/config/inversify.config';
 import { IDriverService } from '@/services/interfaces/i-driver-service';
 import { TYPES } from '@/types/inversify-types';
-import { EXCHANGES, QUEUES, RabbitMQ, ROUTING_KEYS } from '@Pick2Me/shared/messaging';
+import { EXCHANGES, QUEUES, RabbitMQ, ROUTING_KEYS } from '@pick2me/shared/messaging';
+
 const driverService = container.get<IDriverService>(TYPES.DriverService);
+
 export class EventConsumer {
   static async init() {
     await RabbitMQ.connect({
@@ -40,5 +42,3 @@ export class EventConsumer {
     });
   }
 }
-
-// INCREASE_DRIVER_RIDE_COUNT: { driverId: '68933743b49a8cf584ff3ef5', status: 'ACCEPT' }

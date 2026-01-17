@@ -13,10 +13,10 @@ import {
   HttpError,
   InternalError,
   NotFoundError,
-} from '@Pick2Me/shared/errors';
-import { IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
-import { IMongoBaseRepository } from '@Pick2Me/shared/mongo';
-import { getRedisService } from '@Pick2Me/shared/redis';
+} from '@pick2me/shared/errors';
+import { IResponse, StatusCode } from '@pick2me/shared/interfaces';
+import { IMongoBaseRepository } from '@pick2me/shared/mongo';
+import { getRedisService } from '@pick2me/shared/redis';
 
 import {
   CreateDriverConnectAccountResponse,

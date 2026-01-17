@@ -4,7 +4,7 @@ import { IRideRepository } from '@/repositories/interfaces/i-ride-repository';
 import { OnlineDriverDTO } from '@/dto/ride.dto';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/types/inversify-types';
-import { IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
+import { IResponse, StatusCode } from '@pick2me/shared/interfaces';
 
 @injectable()
 export class RideService implements IRideService {

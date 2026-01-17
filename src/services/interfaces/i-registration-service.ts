@@ -1,4 +1,4 @@
-import { commonRes } from '@Pick2Me/shared/interfaces';
+import { commonRes } from '@pick2me/shared/interfaces';
 import {
   CheckRegisterDriverRes,
   IdentificationUpdateReq,

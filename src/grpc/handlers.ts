@@ -8,7 +8,7 @@ export function createDriverHandlers(controllers: Handlers) {
   const { driverController } = controllers;
 
   return {
-    // AddEarnings: driverController.AddEarnings.bind(driverController),
+    AddEarnings: driverController.AddEarnings.bind(driverController),
     // getDriverStripe: driverController.getDriverStripe.bind(driverController),
   };
 }

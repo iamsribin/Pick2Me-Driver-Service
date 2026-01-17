@@ -40,7 +40,7 @@ import { IRideRepository } from '@/repositories/interfaces/i-ride-repository';
 
 import { ResubmissionInterface } from '@/interface/resubmission.interface';
 import { ResubmissionModel } from '@/model/resubmission.model';
-import { IMongoBaseRepository, MongoBaseRepository } from '@Pick2Me/shared/mongo';
+import { IMongoBaseRepository, MongoBaseRepository } from '@pick2me/shared/mongo';
 import { DailyStatusRepository } from '@/repositories/implementation/daily-status-repository';
 import { IDailyStatusRepository } from '@/repositories/interfaces/i-daily-satus-repository';
 

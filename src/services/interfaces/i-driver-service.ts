@@ -1,12 +1,13 @@
-import { IResponse } from '@Pick2Me/shared/interfaces';
+import { commonRes, IResponse } from '@pick2me/shared/interfaces';
 import { DriverDocumentDTO, DriverProfileDTO, MainDashboardDto } from '@/dto/driver.dto';
 import {
   AddEarningsRequest,
+  FilterType,
   UpdateDriverDocumentsReq,
   UpdateDriverProfileReq,
   UpdateRideCount,
 } from '@/types';
-import { PaymentResponse } from '@/types/driver-type/response-type';
+import { ActivityResponse, PaymentResponse } from '@/types/driver-type/response-type';
 
 export interface IDriverService {
   fetchDriverProfile(id: string): Promise<IResponse<DriverProfileDTO>>;
@@ -20,6 +21,7 @@ export interface IDriverService {
     lng?: number
   ): Promise<IResponse<null>>;
   fetchMainDashboard(driverId: string): Promise<MainDashboardDto>;
-  addEarnings(earnings: AddEarningsRequest): Promise<void>;
+  addEarnings(earnings: AddEarningsRequest): Promise<commonRes>;
   updateRideCount(payload: UpdateRideCount): Promise<void>;
+  getDriverStats(driverId: string, filter: FilterType): Promise<ActivityResponse[]>;
 }

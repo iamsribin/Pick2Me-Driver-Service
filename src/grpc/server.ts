@@ -1,5 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
-import { driverServiceDescriptor } from '@Pick2Me/shared/protos';
+import { driverServiceDescriptor } from '@pick2me/shared/protos';
 import { createDriverHandlers } from './handlers';
 import { container } from '../config/inversify.config';
 import { TYPES } from '../types/inversify-types';

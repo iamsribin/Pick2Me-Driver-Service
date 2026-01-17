@@ -4,6 +4,9 @@ export interface UpdateDriverProfileReq {
   imageUrl: string;
 }
 
+export type FilterType = 'day' | 'month' | 'year';
+
+
 type AadharUpdates = {
   id?: string;
   frontImageUrl?: string;

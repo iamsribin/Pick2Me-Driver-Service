@@ -6,8 +6,8 @@ import { NextFunction, Request, Response } from 'express';
 import uploadToS3, { uploadToS3Public } from '@/utilities/s3';
 import { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js';
 import { PaymentResponse } from '@/types/driver-type/response-type';
-import { BadRequestError } from '@Pick2Me/shared/errors';
-import { StatusCode } from '@Pick2Me/shared/interfaces';
+import { BadRequestError } from '@pick2me/shared/errors';
+import { commonRes, StatusCode } from '@pick2me/shared/interfaces';
 import { recursivelySignImageUrls } from '@/utilities/createImageUrl';
 import { AddEarningsRequest, SectionUpdates } from '@/types';
 
@@ -16,7 +16,7 @@ export class DriverController implements IDriverController {
   constructor(
     @inject(TYPES.DriverService)
     private readonly _driverService: IDriverService
-  ) {}
+  ) { }
 
   fetchDriverProfile = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     try {
@@ -26,18 +26,6 @@ export class DriverController implements IDriverController {
       console.log(user);
 
       const response = await this._driverService.fetchDriverProfile(user.id);
-      console.log(response);
-
-      const sample: AddEarningsRequest = {
-        driverId: user.id,
-        userId: user.id,
-        driverShare: 300n,
-        platformFee: 900n,
-        bookingId: user.id,
-        isAddCommission: true,
-      };
-      const dd = await this._driverService.addEarnings(sample);
-      console.log(dd);
 
       res.status(+response.status).json(response.data);
     } catch (error) {
@@ -170,59 +158,32 @@ export class DriverController implements IDriverController {
     }
   };
 
-  // AddEarnings = async (
-  //   call: ServerUnaryCall<AddEarningsRequest, PaymentResponse>,
-  //   callback: sendUnaryData<PaymentResponse>
-  // ): Promise<void> => {
-  //   try {
-  //     const response = await this._driverService.addEarnings(call.request);
-  //     callback(null, response);
-  //   } catch (error) {
-  //     console.log(error);
-  //     callback(null, {
-  //       status: 'failed',
-  //       message: (error as Error).message,
-  //     });
-  //   }
-  // };
+  AddEarnings = async (
+    call: ServerUnaryCall<AddEarningsRequest, PaymentResponse>,
+    callback: sendUnaryData<commonRes>
+  ): Promise<void> => {
+    try {
+      console.log('call.request', call.request);
 
-  // getDriverStripe = async (
-  //   call: ServerUnaryCall<{ driverId: string }, { status: string; stripeId: string }>,
-  //   callback: sendUnaryData<{ status: string; stripeId: string }>
-  // ): Promise<void> => {
-  //   try {
-  //     const response = await this._driverService.getDriverStripe(call.request.driverId);
-  //     callback(null, response);
-  //   } catch (error) {
-  //     console.log(error);
-  //     callback(null, { status: 'failed', stripeId: '' });
-  //   }
-  // };
+      const response = await this._driverService.addEarnings(call.request);
+      callback(null, response);
+    } catch (error) {
+      console.log(error);
+      callback(null, {
+        status: StatusCode.InternalServerError,
+        message: (error as Error).message,
+      });
+    }
+  };
 
-  // uploadChatFile = async (req: Request, res: Response) => {
-  //   try {
-  //     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-
-  //     if (!files || !files['file'] || !files['file'].length) {
-  //       return res.status(400).json({ message: 'No file provided' });
-  //     }
-
-  //     const file = files['file'][0];
-  //     const url = await uploadToS3Public(file);
-  //     return res.status(202).json({ message: 'success', fileUrl: url });
-  //   } catch (error) {
-  //     console.log('error', error);
-  //     res.status(StatusCode.InternalServerError).json({
-  //       message: 'Internal Server Error',
-  //     });
-  //   }
-  // };
-
-  // increaseCancelCount = async (payload: increaseCancelCountReq): Promise<void> => {
-  //   try {
-  //     await this._driverService.increaseCancelCount(payload);
-  //   } catch (error) {
-  //     console.log('error', error);
-  //   }
-  // };
+  getDriverStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const driver = req.gatewayUser;
+      const filter = (req.query.filter as 'day' | 'month' | 'year') || 'month';
+      const response = await this._driverService.getDriverStats(driver.id, filter);
+      res.status(StatusCode.OK).json({ data: response });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -6,10 +6,10 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@/types/inversify-types';
 import { postResubmissionDocumentsReq } from '@/types';
 import { AccountStatus, DriverInterface } from '@/interface/driver.interface';
-import { HttpError, InternalError, NotFoundError } from '@Pick2Me/shared/errors';
-import { commonRes, StatusCode } from '@Pick2Me/shared/interfaces';
-import { AccessPayload, generateJwtToken } from '@Pick2Me/shared/auth';
-import { IMongoBaseRepository } from '@Pick2Me/shared/mongo';
+import { HttpError, InternalError, NotFoundError } from '@pick2me/shared/errors';
+import { commonRes, StatusCode } from '@pick2me/shared/interfaces';
+import { AccessPayload, generateJwtToken } from '@pick2me/shared/auth';
+import { IMongoBaseRepository } from '@pick2me/shared/mongo';
 import {
   CheckLoginDriverRes,
   GetResubmissionDocumentsRes,

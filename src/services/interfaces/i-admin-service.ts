@@ -1,4 +1,4 @@
-import { IResponse } from '@Pick2Me/shared/interfaces';
+import { IResponse } from '@pick2me/shared/interfaces';
 import { AdminUpdateDriverStatusReq } from '@/types';
 import { AdminDriverDetailsDTO, PaginatedUserListDTO } from '@/dto/admin.dto';
 

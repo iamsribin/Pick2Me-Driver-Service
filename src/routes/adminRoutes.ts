@@ -2,8 +2,8 @@ import { Router } from 'express';
 import { container } from '@/config/inversify.config';
 import { IAdminController } from '@/controllers/interfaces/i-admin-controller';
 import { TYPES } from '@/types/inversify-types';
-import { verifyGatewayJwt } from '@Pick2Me/shared/auth';
-import { catchAsync } from '@Pick2Me/shared/utils';
+import { verifyGatewayJwt } from '@pick2me/shared/auth';
+import { catchAsync } from '@pick2me/shared/utils';
 
 const adminDriverController = container.get<IAdminController>(TYPES.AdminController);
 const adminRouter = Router();

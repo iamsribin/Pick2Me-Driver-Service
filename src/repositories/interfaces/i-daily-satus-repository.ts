@@ -1,5 +1,7 @@
 import { DriverDailyStatsInterface } from '@/interface/daily-status.interface';
-import { IMongoBaseRepository } from '@Pick2Me/shared/mongo';
+import { FilterType } from '@/types';
+import { ActivityResponse } from '@/types/driver-type/response-type';
+import { IMongoBaseRepository } from '@pick2me/shared/mongo';
 
 export interface IDailyStatusRepository extends IMongoBaseRepository<DriverDailyStatsInterface> {
   addSessionMinutesToDailyStats(driverId: string, startMs: number, endMs: number): Promise<void>;
@@ -8,4 +10,5 @@ export interface IDailyStatusRepository extends IMongoBaseRepository<DriverDaily
     field: 'completedRides' | 'cancelledRides',
     increment?: number
   ): Promise<void>;
+  getDriverStats(driverId: string, filter?: FilterType): Promise<Array<ActivityResponse>>;
 }

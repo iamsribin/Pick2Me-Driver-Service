@@ -28,7 +28,6 @@ export default defineConfig([
 
       // General ESLint rules
       'no-console': 'off',
-      quotes: ['error', 'single'],
       semi: ['error', 'always'],
 
       // TS rules override

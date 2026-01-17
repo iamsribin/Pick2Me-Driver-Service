@@ -1,5 +1,5 @@
 import express from 'express';
-import { catchAsync } from '@Pick2Me/shared/utils';
+import { catchAsync } from '@pick2me/shared/utils';
 import { RegisterController } from '@/controllers/implementation/register-controller';
 import { LoginController } from '@/controllers/implementation/login-controller';
 import { container } from '@/config/inversify.config';

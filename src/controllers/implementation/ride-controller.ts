@@ -5,7 +5,7 @@ import { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js';
 import { OnlineDriverDTO } from '@/dto/ride.dto';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/types/inversify-types';
-import { IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
+import { IResponse, StatusCode } from '@pick2me/shared/interfaces';
 
 @injectable()
 export class RideController implements IRideController {

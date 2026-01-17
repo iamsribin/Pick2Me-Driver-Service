@@ -1,8 +1,8 @@
 import { container } from '@/config/inversify.config';
 import { IDriverService } from '@/services/interfaces/i-driver-service';
 import { TYPES } from '@/types/inversify-types';
-import { HEARTBEAT_PREFIX } from '@Pick2Me/shared/constants';
-import { getRedisService } from '@Pick2Me/shared/redis';
+import { HEARTBEAT_PREFIX } from '@pick2me/shared/constants';
+import { getRedisService } from '@pick2me/shared/redis';
 
 const driverService = container.get<IDriverService>(TYPES.DriverService);
 
@@ -15,7 +15,7 @@ export async function listenForExpiredKeys() {
 
   await subscriber.subscribe('__keyevent@0__:expired');
 
-  subscriber.on('message', async (_, key) => {
+  subscriber.on('message', async (channel: string, key: string) => {
     console.log('message on expire key', key);
 
     const baseKey = key.substring(0, key.lastIndexOf(':') + 1);

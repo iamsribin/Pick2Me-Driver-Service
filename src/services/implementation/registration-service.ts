@@ -4,8 +4,8 @@ import { DriverInterface } from '@/interface/driver.interface';
 import { IRegistrationService } from '../interfaces/i-registration-service';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/types/inversify-types';
-import { BadRequestError, HttpError, InternalError, NotFoundError } from '@Pick2Me/shared/errors';
-import { commonRes, StatusCode } from '@Pick2Me/shared/interfaces';
+import { BadRequestError, HttpError, InternalError, NotFoundError } from '@pick2me/shared/errors';
+import { commonRes, StatusCode } from '@pick2me/shared/interfaces';
 import uploadToS3, { uploadToS3Public } from '@/utilities/s3';
 import {
   CheckRegisterDriverRes,
